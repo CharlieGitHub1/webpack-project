@@ -1,6 +1,8 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const { argv } = require('process');
+const analyze = argv.some((val) => val === '--analyze');
 
 module.exports = {
     mode: 'development',
@@ -14,7 +16,7 @@ module.exports = {
         assetModuleFilename: '[name][ext]'
     },
     devtool: 'source-map',
-    devServer: {
+    devServer: !analyze ? {
         static: {
             directory: path.resolve(__dirname, 'dist'),
         },
@@ -23,7 +25,7 @@ module.exports = {
         hot: true,
         compress: true,
         historyApiFallback: true,
-    },
+    } : {},
     module: {
         rules: [
             {
@@ -51,11 +53,12 @@ module.exports = {
         ],
     },
     plugins: [
-        new HtmlWebpackPlugin({
-            title: 'Application Webpack',
-            filename: 'index.html',
-            template: 'src/temp-app.html'
-        }),
-        new BundleAnalyzerPlugin(),
+        analyze ?
+            new BundleAnalyzerPlugin() :
+            new HtmlWebpackPlugin({
+                title: 'Application Webpack',
+                filename: 'index.html',
+                template: 'src/temp-app.html'
+            }),
     ],
 }
